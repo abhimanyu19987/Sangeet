@@ -13,22 +13,23 @@ router.post("/register",async(req,res)=>{
 
 
 
-    const user = await User.fondOne({email : email});
+    const user = await User.findOne({email : email});
     if(user){
         
         return res.status(403).json({error:"A user with this email alredy exist"})
     }
     // else this is a valid user
-    const hashedPassword =bcrypt.hash{password,10};
+    const hashedPassword =bcrypt.hash(password,10);
     const newUserData={email,password:hashedPassword,firstName,lastName,username};
     const newUser =await User.create(newUserData);
 
 
 
-    const token = await getToken{email,newUser};
+    const token = await getToken(email,newUser);
 
 
     const userToReturn ={...newUser.toJSON(),token};
     delete userToReturn.password;
     return res.status(200).json(userToReturn);
 });
+module .exports =router;

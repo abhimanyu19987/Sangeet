@@ -1,5 +1,6 @@
 const express= require("express");//import all express funtionalities
 const mongoose =require ("mongoose");
+const authRoutes =require("./routes/auth")
 const JwtStrategy = require("passport-jwt").Strategy,
 ExtractJwt = require("passport-jwt").ExtractJwt;
 require("dotenv").config();
@@ -7,6 +8,11 @@ const passport =require("passport");
 const User=require("./models/User");
 const app=express();//we bring all package code in our local file
 const port =8080;
+
+app.use(express.json());
+
+
+
 mongoose.connect(  
 
 "mongodb+srv://abhimanyukumar19987:"+process.env.MONGO_PASSWORD+"@cluster0.d0rguwk.mongodb.net/?retryWrites=true&w=majority" ,
@@ -28,6 +34,8 @@ mongoose.connect(
 app.get("/",(req,res)=>{
     res.send("Hello World");
 });
+
+app.use("/auth",authRoutes);
 
 app.listen(port,()=>{
     console.log ("App is runing on port "+port);
