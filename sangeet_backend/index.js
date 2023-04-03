@@ -1,7 +1,7 @@
 const express= require("express");//import all express funtionalities
 const mongoose =require ("mongoose");
 const authRoutes =require("./routes/auth")
-const authRoutes =require("./routes/song")
+const songRoutes =require("./routes/song")
 const JwtStrategy = require("passport-jwt").Strategy,
 ExtractJwt = require("passport-jwt").ExtractJwt;
 require("dotenv").config();
