@@ -4,6 +4,7 @@ const bcrypt =require("bcrypt");
 const User =require ("../models/User");
 const {getToken}=require("../utils/helpers");
 // router will help to register a user
+
 router.post("/register",async(req,res)=>{
     // this code run whileregistering a user
 

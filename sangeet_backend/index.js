@@ -1,6 +1,7 @@
 const express= require("express");//import all express funtionalities
 const mongoose =require ("mongoose");
 const authRoutes =require("./routes/auth")
+const authRoutes =require("./routes/song")
 const JwtStrategy = require("passport-jwt").Strategy,
 ExtractJwt = require("passport-jwt").ExtractJwt;
 require("dotenv").config();
@@ -36,6 +37,7 @@ app.get("/",(req,res)=>{
 });
 
 app.use("/auth",authRoutes);
+app.use("/song",songRoutes);
 
 app.listen(port,()=>{
     console.log ("App is runing on port "+port);
