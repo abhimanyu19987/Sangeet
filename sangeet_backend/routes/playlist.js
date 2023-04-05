@@ -40,7 +40,7 @@ passport.authenticate("jwt", {session : false}),async (req,res) => {
 
 });
 router.get("/get/artist/:artistId",passport.authenticate("jwt",{session:false}),async(req,res) =>{
-    const artistId =req.params.artistId;
+    const {artistId} =req.params;
 
     const artist =await UserModel.findOne({id:artistId});
     if(!artist){
@@ -59,7 +59,7 @@ const {playlist,songId}=req.body;
 if(!playlist){
     return res.status(304).json({err:"playlist doesn't exist"})
 }
-if(playlist.owner!=currentUser._id||!playlist.collaboraters.includes(currentUser._id)){
+if(!playlist.owner.equals(currentUser._id)||!playlist.collaboraters.includes(currentUser._id)){
     return res.status(400).json({err:"Not allowed"});
 }
 const song =await sessionStorage.findOne({_id : songId});
