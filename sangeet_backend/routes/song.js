@@ -27,7 +27,8 @@ router.get("/get/mysongs",passport.authenticate("jwt",{session:false}),
 
 /////GET ROUTE TO ALL SONGS OF ANY ARTIST
 /////GET ROUTE BY NAME
-router.get("/get/artist/:artistId",passport.authenticate("jwt",{session:false}),
+router.get("/get/artist/:artistId",
+passport.authenticate("jwt",{session:false}),
  async(req,res)=>{
     const {artistId}=req.params;
     const artist = await User.findOne({_id:artistId});
@@ -38,6 +39,9 @@ router.get("/get/artist/:artistId",passport.authenticate("jwt",{session:false}),
     return res.status(200).json({data: songs});
  }
 );
+
+
+
 router.get("/get/songname/:songName",passport.authenticate("jwt",{session:false}),
  async(req,res)=>{
     const {songName}=req.params;
