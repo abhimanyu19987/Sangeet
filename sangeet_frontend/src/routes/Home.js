@@ -1,5 +1,4 @@
 import {Icon} from "@iconify/react";
-// import spotify_logo from "../assets/images/spotify_logo_white.svg";
 import IconText from "../components/shared/IconText";
 import TextWithHover from "../components/shared/TextWithHover";
 
@@ -117,9 +116,18 @@ const Home = () => {
                             <div className="h-1/2 border-r border-white"></div>
                         </div>
                         <div className="w-2/5 flex justify-around h-full items-center">
-                            <TextWithHover displayText={"Sign up"} />
+                        <IconText
+                           
+                            displayText={"Sign up"}
+                            targetLink={"/Signup"}
+                        />
+                            
                             <div className="bg-white h-2/3 px-8 flex items-center justify-center rounded-full font-semibold cursor-pointer">
-                                Log in
+                            <IconText
+                           
+                           displayText={"Login"}
+                           targetLink={"/Login"}
+                       />
                             </div>
                         </div>
                     </div>

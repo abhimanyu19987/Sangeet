@@ -1,12 +1,19 @@
 import {useContext, useState, useLayoutEffect, useRef} from "react";
 import {Howl, Howler} from "howler";
 import {Icon} from "@iconify/react";
-// import spotify_logo from "../assets/images/spotify_logo_white.svg";
 import IconText from "../components/shared/IconText";
 import TextWithHover from "../components/shared/TextWithHover";
 import songContext from "../contexts/songContext";
+import CreatePlaylistModal from "../modals/CreatePlaylistModal";
+import AddToPlaylistModal from "../modals/AddToPlaylistModal";
+import {makeAuthenticatedPOSTRequest} from "../utils/serverHelpers";
+
 
 const LoggedInContainer = ({children, curActiveScreen}) => {
+    const [createPlaylistModalOpen, setCreatePlaylistModalOpen] =
+        useState(false);
+    const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false);
+
     const {
         currentSong,
         setCurrentSong,
@@ -29,8 +36,21 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             return;
         }
         changeSong(currentSong.track);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+      
     }, [currentSong && currentSong.track]);
+
+    const addSongToPlaylist = async (playlistId) => {
+        const songId = currentSong._id;
+
+        const payload = {playlistId, songId};
+        const response = await makeAuthenticatedPOSTRequest(
+            "/playlist/add/song",
+            payload
+        );
+        if(response._id){
+            setAddToPlaylistModalOpen(false)
+        }
+    };
 
     const playSound = () => {
         if (!soundPlayed) {
@@ -69,7 +89,22 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
     return (
         <div className="h-full w-full bg-gray-600
         ">
-            <div className={`${currentSong ? "h-9/10" : "h-full"} w-full flex`}>
+             {createPlaylistModalOpen && (
+                <CreatePlaylistModal
+                    closeModal={() => {
+                        setCreatePlaylistModalOpen(false);
+                    }}
+                />
+            )}
+            {addToPlaylistModalOpen && (
+                <AddToPlaylistModal
+                    closeModal={() => {
+                        setAddToPlaylistModalOpen(false);
+                    }}
+                    addSongToPlaylist={addSongToPlaylist}
+                />
+            )}
+            <div className={`${currentSong ? "h-4/5" : "h-full"} w-full flex`}>
                 {/* This first div will be the left panel */}
                 <div className="h-full w-1/5 bg-black flex flex-col justify-between pb-10">
                     <div>
@@ -94,6 +129,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                 iconName={"icomoon-free:books"}
                                 displayText={"Library"}
                                 active={curActiveScreen === "library"}
+                                targetLink={"/library"}
                             />
                             <IconText
                                 iconName={
@@ -108,6 +144,9 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             <IconText
                                 iconName={"material-symbols:add-box"}
                                 displayText={"Create Playlist"}
+                                onClick={() => {
+                                    setCreatePlaylistModalOpen(true);
+                                }}
                             />
                             <IconText
                                 iconName={"mdi:cards-heart"}
@@ -135,9 +174,13 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                 <div className="h-1/2 border-r border-white"></div>
                             </div>
                             <div className="w-1/3 flex justify-around h-full items-center">
-                                <TextWithHover displayText={"Upload Song"} />
+                            <IconText
+                               
+                                displayText={"Upload Song"}
+                                targetLink={"/UploadSong"}
+                            />
                                 <div className="bg-white w-10 h-10 flex items-center justify-center rounded-full font-semibold cursor-pointer">
-                                    AC
+                                    AK
                                 </div>
                             </div>
                         </div>
@@ -149,7 +192,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             </div>
             {/* This div is the current playing song */}
             {currentSong && (
-                <div className="w-full h-1/10 bg-black bg-opacity-30 text-white flex items-center px-4">
+                <div className="  h-1/10  w-full bg-black bg-opacity-30 text-white flex items-center px-4">
                     <div className="w-1/4 flex items-center">
                         <img
                             src={currentSong.thumbnail}
@@ -167,7 +210,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             </div>
                         </div>
                     </div>
-                    <div className="w-1/2 flex justify-center h-full flex-col items-center">
+                    <div className="w-full flex justify-center h-full flex-col items-center">
                         <div className="flex w-1/3 justify-between items-center">
                             {/* controls for the playing song go here */}
                             <Icon
@@ -201,9 +244,22 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                 className="cursor-pointer text-gray-500 hover:text-white"
                             />
                         </div>
-                        {/* <div>Progress Bar Here</div> */}
                     </div>
-                    <div className="w-1/4 flex justify-end">hello</div>
+                    <div className="w-1/4 flex justify-end pr-4 space-x-4 items-center">
+                        <Icon
+                            icon="ic:round-playlist-add"
+                            fontSize={30}
+                            className="cursor-pointer text-gray-500 hover:text-white"
+                            onClick={() => {
+                                setAddToPlaylistModalOpen(true);
+                            }}
+                        />
+                        <Icon
+                            icon="ph:heart-bold"
+                            fontSize={25}
+                            className="cursor-pointer text-gray-500 hover:text-white"
+                        />
+                    </div>
                 </div>
             )}
         </div>

@@ -1,4 +1,3 @@
-
 const express = require("express");
 const passport = require("passport");
 const Playlist = require("../models/Playlist");
@@ -48,6 +47,21 @@ router.get(
             return res.status(301).json({err: "Invalid ID"});
         }
         return res.status(200).json(playlist);
+    }
+);
+
+// Get all playlists made by me
+// /get/me
+router.get(
+    "/get/me",
+    passport.authenticate("jwt", {session: false}),
+    async (req, res) => {
+        const artistId = req.user._id;
+
+        const playlists = await Playlist.find({owner: artistId}).populate(
+            "owner"
+        );
+        return res.status(200).json({data: playlists});
     }
 );
 
@@ -103,6 +117,5 @@ router.post(
         return res.status(200).json(playlist);
     }
 );
-
 
 module.exports = router;
