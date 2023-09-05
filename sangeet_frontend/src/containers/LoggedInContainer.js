@@ -7,13 +7,17 @@ import songContext from "../contexts/songContext";
 import CreatePlaylistModal from "../modals/CreatePlaylistModal";
 import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import {makeAuthenticatedPOSTRequest} from "../utils/serverHelpers";
+import { makeAuthenticatedGETRequest } from "../utils/serverHelpers";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 
 const LoggedInContainer = ({children, curActiveScreen}) => {
     const [createPlaylistModalOpen, setCreatePlaylistModalOpen] =
         useState(false);
     const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false);
-
+    const navigate = useNavigate();
+    const [cookies, setCookie, removeCookie] = useCookies(["token"]);
     const {
         currentSong,
         setCurrentSong,
@@ -51,7 +55,23 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             setAddToPlaylistModalOpen(false)
         }
     };
-
+    const addSongToLiked = async () => {
+        const songId = currentSong._id;
+        const payload = { songId };
+    
+        const response = await makeAuthenticatedPOSTRequest(
+          "/song/add/liked",
+          payload
+        );
+    
+        console.log(response);
+        if (response === 1) {
+          alert("Song already liked");
+        } else if (response._id) {
+          alert("added to liked");
+        }
+      };
+    
     const playSound = () => {
         if (!soundPlayed) {
             return;
@@ -85,7 +105,10 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             setIsPaused(true);
         }
     };
-
+    const logout = async () => {
+        removeCookie("token");
+        navigate("/login");
+      };
     return (
         <div className="h-full w-full bg-gray-600
         ">
@@ -104,11 +127,11 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                     addSongToPlaylist={addSongToPlaylist}
                 />
             )}
-            <div className={`${currentSong ? "h-4/5" : "h-full"} w-full flex`}>
+            <div className={`${currentSong ? "h-full" :"h-full"} w-full flex`}>
                 {/* This first div will be the left panel */}
-                <div className="h-full w-1/5 bg-black flex flex-col justify-between pb-10">
+                <div className="h-9/10 w-1/5 bg-black flex flex-col justify-between pb-10">
                     <div>
-                    <div className="logo p-2 border-b border-solid border-gray-300 w-full flex justify-center">
+                    <div className="logo p-1/10 border-b border-solid border-gray-300 w-full flex justify-center">
                <h1 style={{  fontFamily: 'Times-BoldItalic',fontSize : 25 ,color: 'white',}}>SANGEET</h1>
                <Icon icon="mdi:music-note-plus"   width ="30" color=' white' />
                </div>
@@ -148,10 +171,12 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                     setCreatePlaylistModalOpen(true);
                                 }}
                             />
-                            <IconText
-                                iconName={"mdi:cards-heart"}
-                                displayText={"Liked Songs"}
-                            />
+                             <IconText
+                                    iconName={"mdi:cards-heart"}
+                                    displayText={"Liked Songs"}
+                                    active={curActiveScreen === "liked"}
+                                    targetLink={"/liked"}
+                                />
                         </div>
                     </div>
                     <div className="px-5">
@@ -171,35 +196,62 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                 <TextWithHover displayText={"Premium"} />
                                 <TextWithHover displayText={"Support"} />
                                 <TextWithHover displayText={"Download"} />
-                                <div className="h-1/2 border-r border-white"></div>
+                                <div className="h-2/3 border-r border-white"></div>
                             </div>
-                            <div className="w-1/3 flex justify-around h-full items-center">
+                            <div className="w-2/3 flex justify-around h-full items-center">
                             <IconText
                                
                                 displayText={"Upload Song"}
                                 targetLink={"/UploadSong"}
                             />
-                                <div className="bg-white w-10 h-10 flex items-center justify-center rounded-full font-semibold cursor-pointer">
-                                    AK
-                                </div>
+                                 <button
+                                    className="bg-gray-300 font-semibold p-1/2 px-2 rounded-full "
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        logout();
+                                    }}
+                                    >
+                                    LOG OUT
+                                    </button>
+
+
+                                       <a
+                                            className="bg-gray-300 font-semibold p-1/2 px-2 rounded-full "
+                                            href="/profile"
+                                        >
+                                            <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-6 w-6 bg-gray"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="3"
+                                                d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                            </svg>
+                                        </a>
                             </div>
                         </div>
                     </div>
-                    <div className="content p-8 pt-0 overflow-auto">
+                    <div className="content p-7 pt-0 overflow-auto">
                         {children}
                     </div>
                 </div>
             </div>
             {/* This div is the current playing song */}
             {currentSong && (
-                <div className="  h-1/10  w-full bg-black bg-opacity-30 text-white flex items-center px-4">
+                <div className="  w-full bg-black bg-opacity text-white flex items-center px-2 fixed-bottom ">
                     <div className="w-1/4 flex items-center">
                         <img
                             src={currentSong.thumbnail}
                             alt="currentSongThumbail"
                             className="h-14 w-14 rounded"
                         />
-                        <div className="pl-4">
+                        <div className="pl-3">
                             <div className="text-sm hover:underline cursor-pointer">
                                 {currentSong.name}
                             </div>
@@ -210,7 +262,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             </div>
                         </div>
                     </div>
-                    <div className="w-full flex justify-center h-full flex-col items-center">
+                    <div className=" w-full flex justify-center h-full flex-col items-center ">
                         <div className="flex w-1/3 justify-between items-center">
                             {/* controls for the playing song go here */}
                             <Icon
@@ -245,7 +297,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             />
                         </div>
                     </div>
-                    <div className="w-1/4 flex justify-end pr-4 space-x-4 items-center">
+                    <div className="w-1/4 flex justify-end pr-4 space-x-4 items-bottom">
                         <Icon
                             icon="ic:round-playlist-add"
                             fontSize={30}
@@ -254,11 +306,14 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                 setAddToPlaylistModalOpen(true);
                             }}
                         />
-                        <Icon
-                            icon="ph:heart-bold"
-                            fontSize={25}
-                            className="cursor-pointer text-gray-500 hover:text-white"
-                        />
+                         <Icon
+                                icon="ph:heart-bold"
+                                fontSize={25}
+                                className="cursor-pointer text-gray-500 hover:text-white"
+                                onClick={() => {
+                                    addSongToLiked();
+                                }}
+                                />
                     </div>
                 </div>
             )}
